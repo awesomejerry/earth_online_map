@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:earth_online_map/add_new_city_input.dart';
 import 'package:earth_online_map/map.dart';
 import 'package:earth_online_map/sign_in_button.dart';
@@ -23,10 +25,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    var generatedColor = Random().nextInt(Colors.primaries.length);
     return MaterialApp(
       title: 'Earth Online: Map',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme:
+            ColorScheme.fromSeed(seedColor: Colors.primaries[generatedColor]),
         useMaterial3: true,
       ),
       home: const Material(

@@ -65,23 +65,22 @@ class _MyMapState extends ConsumerState<MyMap> {
       width: 40,
       height: 40,
       point: LatLng(geoPoint.latitude, geoPoint.longitude),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.blue,
-        ),
-        child: Center(
-          child: Tooltip(
-            message: name,
-            child: InkWell(
-              child: const Icon(
-                Icons.flag,
-                color: Colors.white,
-              ),
-              onLongPress: () {
-                removeMarker(id);
-              },
+      child: Center(
+        child: Tooltip(
+          message: name,
+          child: InkWell(
+            child: Image.asset(
+              "assets/images/flag.gif",
+              height: 64.0,
+              width: 64.0,
             ),
+            // child: const Icon(
+            //   Icons.flag,
+            //   color: Colors.white,
+            // ),
+            onLongPress: () {
+              removeMarker(id);
+            },
           ),
         ),
       ),
@@ -112,13 +111,14 @@ class _MyMapState extends ConsumerState<MyMap> {
               return Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(markerClusterSize / 2),
-                  color: Colors.blue,
+                  color: Theme.of(context).primaryColor,
                 ),
                 child: Center(
                   child: Text(
                     markers.length.toString(),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color:
+                          Theme.of(context).primaryTextTheme.titleLarge?.color,
                       fontSize: 24,
                     ),
                   ),
