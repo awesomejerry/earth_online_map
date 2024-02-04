@@ -1,4 +1,5 @@
 import 'package:earth_online_map/map.dart';
+import 'package:earth_online_map/sign_in_button.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   runApp(const MyApp());
 }
 
@@ -23,7 +25,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyMap(),
+      home: const Material(
+        child: Stack(
+          children: [
+            MyMap(),
+            MySignInButton(),
+          ],
+        ),
+      ),
     );
   }
 }
