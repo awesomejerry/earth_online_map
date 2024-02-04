@@ -1,18 +1,84 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class MyMap extends StatelessWidget {
+class MyMap extends StatefulWidget {
   const MyMap({super.key});
+
+  @override
+  State<MyMap> createState() => _MyMapState();
+}
+
+class _MyMapState extends State<MyMap> {
+  late StreamSubscription _subscription;
+  List<Marker> markers = [];
+  late MapController mapController;
+  double markerClusterSize = 50;
+
+  @override
+  void initState() {
+    super.initState();
+
+    mapController = MapController();
+
+    var db = FirebaseFirestore.instance;
+    final collectionRef = db.collection("cities");
+    _subscription = collectionRef.snapshots().listen((snapshot) {
+      var newMarkers = <Marker>[];
+      for (var doc in snapshot.docs) {
+        newMarkers.add(buildMarker(doc.data()));
+      }
+      setState(() {
+        markers = newMarkers;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+
+  Marker buildMarker(Map<String, dynamic> data) {
+    String name = data['name'];
+    GeoPoint geoPoint = data['latlng'];
+    return Marker(
+      width: 40,
+      height: 40,
+      point: LatLng(geoPoint.latitude, geoPoint.longitude),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.blue,
+        ),
+        child: Center(
+          child: Tooltip(
+            message: name,
+            child: const Icon(
+              Icons.flag,
+              color: Colors.white,
+              size: 30,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return FlutterMap(
+      mapController: mapController,
       options: const MapOptions(
-        initialCenter: LatLng(51.509364, -0.128928),
-        initialZoom: 9.2,
+        initialCenter: LatLng(23.5, 121.3),
+        initialZoom: 8.0,
       ),
       children: [
         TileLayer(
@@ -20,15 +86,30 @@ class MyMap extends StatelessWidget {
           userAgentPackageName: 'space.awesomejerry.earthonline.map',
           tileProvider: CancellableNetworkTileProvider(),
         ),
-        const MarkerLayer(
-          markers: [
-            Marker(
-              point: LatLng(30, 40),
-              width: 80,
-              height: 80,
-              child: FlutterLogo(),
-            ),
-          ],
+        MarkerClusterLayerWidget(
+          options: MarkerClusterLayerOptions(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(50),
+            markers: markers,
+            size: Size(markerClusterSize, markerClusterSize),
+            builder: (context, markers) {
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(markerClusterSize / 2),
+                  color: Colors.blue,
+                ),
+                child: Center(
+                  child: Text(
+                    markers.length.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
         RichAttributionWidget(
           attributions: [
