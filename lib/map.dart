@@ -16,6 +16,8 @@ class MyMap extends StatefulWidget {
 }
 
 class _MyMapState extends State<MyMap> {
+  FirebaseFirestore db = FirebaseFirestore.instance;
+
   late StreamSubscription _subscription;
   List<Marker> markers = [];
   late MapController mapController;
@@ -27,12 +29,11 @@ class _MyMapState extends State<MyMap> {
 
     mapController = MapController();
 
-    var db = FirebaseFirestore.instance;
     final collectionRef = db.collection("cities");
     _subscription = collectionRef.snapshots().listen((snapshot) {
       var newMarkers = <Marker>[];
       for (var doc in snapshot.docs) {
-        newMarkers.add(buildMarker(doc.data()));
+        newMarkers.add(buildMarker(doc.id, doc.data()));
       }
       setState(() {
         markers = newMarkers;
@@ -46,9 +47,14 @@ class _MyMapState extends State<MyMap> {
     super.dispose();
   }
 
-  Marker buildMarker(Map<String, dynamic> data) {
+  removeMarker(String id) {
+    db.collection('cities').doc(id).delete();
+  }
+
+  Marker buildMarker(String id, Map<String, dynamic> data) {
     String name = data['name'];
     GeoPoint geoPoint = data['latlng'];
+
     return Marker(
       width: 40,
       height: 40,
@@ -61,10 +67,14 @@ class _MyMapState extends State<MyMap> {
         child: Center(
           child: Tooltip(
             message: name,
-            child: const Icon(
-              Icons.flag,
-              color: Colors.white,
-              size: 30,
+            child: InkWell(
+              child: const Icon(
+                Icons.flag,
+                color: Colors.white,
+              ),
+              onLongPress: () {
+                removeMarker(id);
+              },
             ),
           ),
         ),
