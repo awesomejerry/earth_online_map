@@ -1,20 +1,22 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:earth_online_map/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
 const String apiKey = '65bf2e32d1b62736046899szn1f7aa8';
 const String appId = '69f869397f5902fdf99a6780001bbd03';
 
-class AddNewCityInput extends StatefulWidget {
+class AddNewCityInput extends ConsumerStatefulWidget {
   const AddNewCityInput({Key? key}) : super(key: key);
 
   @override
-  State<AddNewCityInput> createState() => _AddNewCityInputState();
+  ConsumerState<AddNewCityInput> createState() => _AddNewCityInputState();
 }
 
-class _AddNewCityInputState extends State<AddNewCityInput> {
+class _AddNewCityInputState extends ConsumerState<AddNewCityInput> {
   final TextEditingController _controller = TextEditingController();
   String _errorMessage = '';
 
@@ -53,6 +55,13 @@ class _AddNewCityInputState extends State<AddNewCityInput> {
 
   @override
   Widget build(BuildContext context) {
+    var user = ref.watch(authProvider);
+    if (user.isLoading) {
+      return Container();
+    }
+    if (user.value == null) {
+      return Container();
+    }
     return SizedBox(
       width: 200,
       height: 60,

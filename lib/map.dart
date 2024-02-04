@@ -1,21 +1,23 @@
 import 'dart:async';
 
+import 'package:earth_online_map/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class MyMap extends StatefulWidget {
+class MyMap extends ConsumerStatefulWidget {
   const MyMap({super.key});
 
   @override
-  State<MyMap> createState() => _MyMapState();
+  ConsumerState<MyMap> createState() => _MyMapState();
 }
 
-class _MyMapState extends State<MyMap> {
+class _MyMapState extends ConsumerState<MyMap> {
   FirebaseFirestore db = FirebaseFirestore.instance;
 
   late StreamSubscription _subscription;
@@ -47,7 +49,11 @@ class _MyMapState extends State<MyMap> {
     super.dispose();
   }
 
-  removeMarker(String id) {
+  removeMarker(String id) async {
+    var user = ref.read(authProvider);
+    if (user.value == null) {
+      return;
+    }
     db.collection('cities').doc(id).delete();
   }
 
