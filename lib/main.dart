@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:circular_reveal_animation/circular_reveal_animation.dart';
 import 'package:earth_online_map/add_new_city_input.dart';
 import 'package:earth_online_map/map.dart';
 import 'package:earth_online_map/sign_in_button.dart';
@@ -19,8 +20,32 @@ void main() async {
   ));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+  late AnimationController animationController;
+  late Animation<double> animation;
+
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    animation = CurvedAnimation(
+      parent: animationController,
+      curve: Curves.easeIn,
+    );
+    Future.delayed(const Duration(seconds: 1), () {
+      animationController.forward();
+    });
+  }
 
   // This widget is the root of your application.
   @override
@@ -33,25 +58,28 @@ class MyApp extends StatelessWidget {
             ColorScheme.fromSeed(seedColor: Colors.primaries[generatedColor]),
         useMaterial3: true,
       ),
-      home: const Material(
-        child: Stack(
-          children: [
-            MyMap(),
-            Positioned(
-              left: 10,
-              bottom: 10,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AddNewCityInput(),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  MySignInButton(),
-                ],
+      home: CircularRevealAnimation(
+        animation: animation,
+        child: const Material(
+          child: Stack(
+            children: [
+              MyMap(),
+              Positioned(
+                left: 10,
+                bottom: 10,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    AddNewCityInput(),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    MySignInButton(),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

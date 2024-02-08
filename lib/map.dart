@@ -10,6 +10,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+const double initialZoom = 8.0;
+const LatLng initialCenter = LatLng(23.5, 121.0);
+
 class MyMap extends ConsumerStatefulWidget {
   const MyMap({super.key});
 
@@ -89,52 +92,79 @@ class _MyMapState extends ConsumerState<MyMap> {
 
   @override
   Widget build(BuildContext context) {
-    return FlutterMap(
-      mapController: mapController,
-      options: const MapOptions(
-        initialCenter: LatLng(23.5, 121.3),
-        initialZoom: 8.0,
-      ),
+    return Stack(
       children: [
-        TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'space.awesomejerry.earthonline.map',
-          tileProvider: CancellableNetworkTileProvider(),
-        ),
-        MarkerClusterLayerWidget(
-          options: MarkerClusterLayerOptions(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.all(50),
-            markers: markers,
-            size: Size(markerClusterSize, markerClusterSize),
-            builder: (context, markers) {
-              return Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(markerClusterSize / 2),
-                  color: Theme.of(context).primaryColor,
-                ),
-                child: Center(
-                  child: Text(
-                    markers.length.toString(),
-                    style: TextStyle(
-                      color:
-                          Theme.of(context).primaryTextTheme.titleLarge?.color,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
-              );
-            },
+        FlutterMap(
+          mapController: mapController,
+          options: const MapOptions(
+            initialCenter: initialCenter,
+            initialZoom: initialZoom,
           ),
-        ),
-        RichAttributionWidget(
-          attributions: [
-            TextSourceAttribution(
-              'OpenStreetMap contributors',
-              onTap: () =>
-                  launchUrl(Uri.parse('https://openstreetmap.org/copyright')),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'space.awesomejerry.earthonline.map',
+              tileProvider: CancellableNetworkTileProvider(),
+            ),
+            MarkerClusterLayerWidget(
+              options: MarkerClusterLayerOptions(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.all(50),
+                markers: markers,
+                size: Size(markerClusterSize, markerClusterSize),
+                builder: (context, markers) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.circular(markerClusterSize / 2),
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    child: Center(
+                      child: Text(
+                        markers.length.toString(),
+                        style: TextStyle(
+                          color: Theme.of(context)
+                              .primaryTextTheme
+                              .titleLarge
+                              ?.color,
+                          fontSize: 24,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            RichAttributionWidget(
+              attributions: [
+                TextSourceAttribution(
+                  'OpenStreetMap contributors',
+                  onTap: () => launchUrl(
+                      Uri.parse('https://openstreetmap.org/copyright')),
+                ),
+              ],
             ),
           ],
+        ),
+        Positioned(
+          top: 0,
+          right: 0,
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_circle_up),
+                onPressed: () {
+                  mapController.rotate(0.0);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.location_on),
+                onPressed: () {
+                  mapController.move(initialCenter, initialZoom);
+                },
+              ),
+            ],
+          ),
         ),
       ],
     );
