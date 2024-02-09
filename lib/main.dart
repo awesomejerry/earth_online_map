@@ -6,6 +6,8 @@ import 'package:earth_online_map/map.dart';
 import 'package:earth_online_map/sign_in_button.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
@@ -28,12 +30,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+  late AnimatedMapController animatedMapController;
   late AnimationController animationController;
   late Animation<double> animation;
 
   @override
   void initState() {
     super.initState();
+
+    animatedMapController = AnimatedMapController(vsync: this);
+
     animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -60,21 +66,25 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
       ),
       home: CircularRevealAnimation(
         animation: animation,
-        child: const Material(
+        child: Material(
           child: Stack(
             children: [
-              MyMap(),
+              MyMap(
+                animatedMapController: animatedMapController,
+              ),
               Positioned(
                 left: 10,
                 bottom: 10,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AddNewCityInput(),
-                    SizedBox(
+                    AddNewCityInput(
+                      animatedMapController: animatedMapController,
+                    ),
+                    const SizedBox(
                       width: 10,
                     ),
-                    MySignInButton(),
+                    const MySignInButton(),
                   ],
                 ),
               ),

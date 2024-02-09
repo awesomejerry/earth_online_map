@@ -2,15 +2,23 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:earth_online_map/auth_provider.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 const String apiKey = '65bf2e32d1b62736046899szn1f7aa8';
 const String appId = '69f869397f5902fdf99a6780001bbd03';
 
 class AddNewCityInput extends ConsumerStatefulWidget {
-  const AddNewCityInput({Key? key}) : super(key: key);
+  final AnimatedMapController animatedMapController;
+
+  const AddNewCityInput({
+    Key? key,
+    required this.animatedMapController,
+  }) : super(key: key);
 
   @override
   ConsumerState<AddNewCityInput> createState() => _AddNewCityInputState();
@@ -46,6 +54,8 @@ class _AddNewCityInputState extends ConsumerState<AddNewCityInput> {
         _controller.text = '';
         _errorMessage = '';
       });
+      widget.animatedMapController
+          .animateTo(dest: LatLng(city['lat'], city['lon']), zoom: 10.0);
     } else {
       setState(() {
         _errorMessage = 'City not found';

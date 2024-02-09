@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:earth_online_map/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,7 +15,9 @@ const double initialZoom = 8.0;
 const LatLng initialCenter = LatLng(23.5, 121.0);
 
 class MyMap extends ConsumerStatefulWidget {
-  const MyMap({super.key});
+  final AnimatedMapController animatedMapController;
+
+  const MyMap({super.key, required this.animatedMapController});
 
   @override
   ConsumerState<MyMap> createState() => _MyMapState();
@@ -25,14 +28,11 @@ class _MyMapState extends ConsumerState<MyMap> {
 
   late StreamSubscription _subscription;
   List<Marker> markers = [];
-  late MapController mapController;
   double markerClusterSize = 50;
 
   @override
   void initState() {
     super.initState();
-
-    mapController = MapController();
 
     final collectionRef = db.collection("cities");
     _subscription = collectionRef.snapshots().listen((snapshot) {
@@ -92,6 +92,8 @@ class _MyMapState extends ConsumerState<MyMap> {
 
   @override
   Widget build(BuildContext context) {
+    var animatedMapController = widget.animatedMapController;
+    var mapController = animatedMapController.mapController;
     return Stack(
       children: [
         FlutterMap(
@@ -154,13 +156,14 @@ class _MyMapState extends ConsumerState<MyMap> {
               IconButton(
                 icon: const Icon(Icons.arrow_circle_up),
                 onPressed: () {
-                  mapController.rotate(0.0);
+                  animatedMapController.animatedRotateReset();
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.location_on),
                 onPressed: () {
-                  mapController.move(initialCenter, initialZoom);
+                  animatedMapController.animateTo(
+                      dest: initialCenter, zoom: initialZoom);
                 },
               ),
             ],
