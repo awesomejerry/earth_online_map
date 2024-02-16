@@ -63,6 +63,7 @@ class _MyMapState extends ConsumerState<MyMap> {
   Marker buildMarker(String id, Map<String, dynamic> data) {
     String name = data['name'];
     GeoPoint geoPoint = data['latlng'];
+    final GlobalKey<TooltipState> tooltipkey = GlobalKey<TooltipState>();
 
     return Marker(
       width: 40,
@@ -70,6 +71,7 @@ class _MyMapState extends ConsumerState<MyMap> {
       point: LatLng(geoPoint.latitude, geoPoint.longitude),
       child: Center(
         child: Tooltip(
+          key: tooltipkey,
           message: name,
           child: InkWell(
             child: Image.asset(
@@ -81,8 +83,33 @@ class _MyMapState extends ConsumerState<MyMap> {
             //   Icons.flag,
             //   color: Colors.white,
             // ),
+            onTap: () => tooltipkey.currentState?.ensureTooltipVisible(),
             onLongPress: () {
-              removeMarker(id);
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('Delete marker?'),
+                    content: const Text(
+                        'Are you sure you want to delete this marker?'),
+                    actions: [
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Delete'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          removeMarker(id);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
           ),
         ),
